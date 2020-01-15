@@ -25,6 +25,7 @@ import time
 
 # import the MUD server class
 from mudserver import MudServer
+import mud_util
 
 
 # structure defining the rooms in the game. Try adding more rooms to the game!
@@ -57,38 +58,10 @@ while True:
     mud.update()
 
     # go through any newly connected players
-    for id in mud.get_new_players():
-
-        # add the new player to the dictionary, noting that they've not been
-        # named yet.
-        # The dictionary key is the player's id number. We set their room to
-        # None initially until they have entered a name
-        # Try adding more player stats - level, gold, inventory, etc
-        players[id] = {
-            "name": None,
-            "room": None,
-        }
-
-        # send the new player a prompt for their name
-        mud.send_message(id, "What is your name?")
+    mud_util.greet_players(players, mud)
 
     # go through any recently disconnected players
-    for id in mud.get_disconnected_players():
-
-        # if for any reason the player isn't in the player map, skip them and
-        # move on to the next one
-        if id not in players:
-            continue
-
-        # go through all the players in the game
-        for pid, pl in players.items():
-            # send each player a message to tell them about the diconnected
-            # player
-            mud.send_message(pid, "{} quit the game".format(
-                                                        players[id]["name"]))
-
-        # remove the player's entry in the player dictionary
-        del(players[id])
+    mud_util.remove_disconnected_players(players, mud)
 
     # go through any new commands sent from players
     for id, command, params in mud.get_commands():
