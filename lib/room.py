@@ -1,5 +1,6 @@
 from lib.enums import ExitType
 
+
 class Exit(Entity):
     def __init__(self, name, destination, description, exit_type: ExitType):
         self.destination = destination
