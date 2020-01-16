@@ -28,23 +28,6 @@ class MudServer(object):
     running.
     """
 
-    # Different states we can be in while reading data from client
-    # See _process_sent_data function
-    ReadState.NORMAL = 1
-    _READ_STATE_COMMAND = 2
-    _READ_STATE_SUBNEG = 3
-
-    # Command codes used by Telnet protocol
-    # See _process_sent_data function
-    _TN_INTERPRET_AS_COMMAND = 255
-    _TN_ARE_YOU_THERE = 246
-    _TN_WILL = 251
-    _TN_WONT = 252
-    _TN_DO = 253
-    _TN_DONT = 254
-    _TN_SUBNEGOTIATION_START = 250
-    _TN_SUBNEGOTIATION_END = 240
-
     # socket used to listen for new clients
     _listen_socket = None
     # holds info on clients. Maps client id to _Client object
@@ -229,7 +212,7 @@ class MudServer(object):
     def _check_for_disconnected(self):
 
         # go through all the clients
-        for id, cl in list(self._clients.items()):
+        for player_id, cl in list(self._clients.items()):
 
             # if we last checked the client less than 5 seconds ago, skip this
             # client and move on to the next one
@@ -240,7 +223,7 @@ class MudServer(object):
             # matter what we send, we're really just checking that data can
             # still be written to the socket. If it can't, an error will be
             # raised and we'll know that the client has disconnected.
-            self._attempt_send(id, "\x00")
+            self._attempt_send(player_id, "\x00")
 
             # update the last check time
             cl.lastcheck = time.time()
@@ -288,7 +271,6 @@ class MudServer(object):
                 self._handle_disconnect(id)
 
     def _handle_disconnect(self, clid):
-
         # remove the client from the clients map
         del(self._clients[clid])
 
