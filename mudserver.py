@@ -14,6 +14,7 @@ import time
 
 from server.server_enums import *
 from server.socket_client import SocketClient
+from server import telnet_handler
 
 
 class MudServer(object):
@@ -29,7 +30,7 @@ class MudServer(object):
 
     # Different states we can be in while reading data from client
     # See _process_sent_data function
-    _READ_STATE_NORMAL = 1
+    ReadState.NORMAL = 1
     _READ_STATE_COMMAND = 2
     _READ_STATE_SUBNEG = 3
 
@@ -266,7 +267,7 @@ class MudServer(object):
                 data = cl.socket.recv(4096).decode("latin1")
 
                 # process the data, stripping out any special Telnet commands
-                message = self._process_sent_data(cl, data)
+                message = telnet_handler.process(cl, data)
 
                 if message:
                     message = message.strip()
@@ -294,83 +295,3 @@ class MudServer(object):
         # add a 'player left' occurence to the new events list, with the
         # player's id number
         self._new_events.append((ServerEvents.PLAYER_LEFT, clid))
-
-    def _process_sent_data(self, client, data):
-
-        # the Telnet protocol allows special command codes to be inserted into
-        # messages. For our very simple server we don't need to response to
-        # any of these codes, but we must at least detect and skip over them
-        # so that we don't interpret them as text data.
-        # More info on the Telnet protocol can be found here:
-        # http://pcmicro.com/netfoss/telnet.html
-
-        # start with no message and in the normal state
-        message = None
-        state = self._READ_STATE_NORMAL
-
-        # go through the data a character at a time
-        for c in data:
-
-            # handle the character differently depending on the state we're in:
-
-            # normal state
-            if state == self._READ_STATE_NORMAL:
-
-                # if we received the special 'interpret as command' code,
-                # switch to 'command' state so that we handle the next
-                # character as a command code and not as regular text data
-                if ord(c) == self._TN_INTERPRET_AS_COMMAND:
-                    state = self._READ_STATE_COMMAND
-
-                # if we get a newline character, this is the end of the
-                # message. Set 'message' to the contents of the buffer and
-                # clear the buffer
-                elif c == "\n":
-                    message = client.buffer
-                    client.buffer = ""
-
-                # some telnet clients send the characters as soon as the user
-                # types them. So if we get a backspace character, this is where
-                # the user has deleted a character and we should delete the
-                # last character from the buffer.
-                elif c == "\x08":
-                    client.buffer = client.buffer[:-1]
-
-                # otherwise it's just a regular character - add it to the
-                # buffer where we're building up the received message
-                else:
-                    client.buffer += c
-
-            # command state
-            elif state == self._READ_STATE_COMMAND:
-
-                # the special 'start of subnegotiation' command code indicates
-                # that the following characters are a list of options until
-                # we're told otherwise. We switch into 'subnegotiation' state
-                # to handle this
-                if ord(c) == self._TN_SUBNEGOTIATION_START:
-                    state = self._READ_STATE_SUBNEG
-
-                # if the command code is one of the 'will', 'wont', 'do' or
-                # 'dont' commands, the following character will be an option
-                # code so we must remain in the 'command' state
-                elif ord(c) in (self._TN_WILL, self._TN_WONT, self._TN_DO,
-                                self._TN_DONT):
-                    state = self._READ_STATE_COMMAND
-
-                # for all other command codes, there is no accompanying data so
-                # we can return to 'normal' state.
-                else:
-                    state = self._READ_STATE_NORMAL
-
-            # subnegotiation state
-            elif state == self._READ_STATE_SUBNEG:
-
-                # if we reach an 'end of subnegotiation' command, this ends the
-                # list of options and we can return to 'normal' state.
-                # Otherwise we must remain in this state
-                if ord(c) == self._TN_SUBNEGOTIATION_END:
-                    state = self._READ_STATE_NORMAL
-
-        # return the contents of 'message' which is either a string or None
-        return message

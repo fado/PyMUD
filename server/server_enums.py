@@ -11,7 +11,7 @@ class ServerEvents(Enum):
 class ReadState(Enum):
     NORMAL = 1
     COMMAND = 2
-    STATE_SUBNEG = 3
+    SUBNEG = 3
 
 
 # Command codes used by Telnet protocol
@@ -24,3 +24,11 @@ class TelnetCodes(Enum):
     DONT = 254
     SUBNEGOTIATION_START = 250
     SUBNEGOTIATION_END = 240
+
+
+TELNET_OPTION_CODES = (
+    TelnetCodes.WILL,
+    TelnetCodes.WONT,
+    TelnetCodes.DO,
+    TelnetCodes.DONT
+)
