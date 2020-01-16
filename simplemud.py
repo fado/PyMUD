@@ -53,6 +53,11 @@ def register_command(function):
     commands[function.__name__] = function
     return function
 
+
+@register_command
+def quit(id, params=None):
+    mud.disconnect(id)
+
 @register_command
 def help(id, params=None):
     # send the player back the list of possible commands

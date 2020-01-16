@@ -1,4 +1,4 @@
-from item_classes import *
+from lib.item import *
 
 
 class Player(object):
