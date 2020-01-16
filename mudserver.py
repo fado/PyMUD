@@ -197,6 +197,9 @@ class MudServer(object):
         # stop listening for new clients
         self._listen_socket.close()
 
+    def disconnect(self, clid):
+        self._clients[clid].socket.shutdown(socket.SHUT_RDWR)
+
     def _attempt_send(self, clid, data):
         # python 2/3 compatability fix - convert non-unicode string to unicode
         if sys.version < '3' and type(data) != unicode:
