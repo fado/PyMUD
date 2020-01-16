@@ -1,4 +1,4 @@
-from lib.enums import ExitType
+from lib.models.enums import ExitType
 
 
 class Exit(Entity):

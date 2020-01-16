@@ -1,4 +1,4 @@
-from lib.item import *
+from lib.models.item import *
 
 
 class Player(Entity):

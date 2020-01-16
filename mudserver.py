@@ -11,7 +11,9 @@ author: Mark Frimston - mfrimston@gmail.com
 import socket
 import select
 import time
-import sys
+
+from server.server_enums import *
+from server.socket_client import SocketClient
 
 
 class MudServer(object):
@@ -24,32 +26,6 @@ class MudServer(object):
     The 'update' method should be called in a loop to keep the server
     running.
     """
-
-    # An inner class which is instantiated for each connected client to store
-    # info about them
-
-    class _Client(object):
-        """Holds information about a connected player"""
-
-        # the socket object used to communicate with this client
-        socket = None
-        # the ip address of this client
-        address = ""
-        # holds data send from the client until a full message is received
-        buffer = ""
-        # the last time we checked if the client was still connected
-        lastcheck = 0
-
-        def __init__(self, socket, address, buffer, lastcheck):
-            self.socket = socket
-            self.address = address
-            self.buffer = buffer
-            self.lastcheck = lastcheck
-
-    # Used to store different types of occurences
-    _EVENT_NEW_PLAYER = 1
-    _EVENT_PLAYER_LEFT = 2
-    _EVENT_COMMAND = 3
 
     # Different states we can be in while reading data from client
     # See _process_sent_data function
@@ -79,7 +55,7 @@ class MudServer(object):
     # list of newly-added occurences
     _new_events = []
 
-    def __init__(self):
+    def __init__(self, interface="0.0.0.0", port=1234):
         """Constructs the MudServer object and starts listening for
         new players.
         """
@@ -102,7 +78,7 @@ class MudServer(object):
         # this requires root permissions, so we use a higher arbitrary port
         # number instead: 1234. Address 0.0.0.0 means that we will bind to all
         # of the available network interfaces
-        self._listen_socket.bind(("0.0.0.0", 1234))
+        self._listen_socket.bind((interface, port))
 
         # set to non-blocking mode. This means that when we call 'accept', it
         # will return immediately without waiting for a connection
@@ -139,7 +115,7 @@ class MudServer(object):
         # go through all the events in the main list
         for ev in self._events:
             # if the event is a new player occurence, add the info to the list
-            if ev[0] == self._EVENT_NEW_PLAYER:
+            if ev[0] == ServerEvents.NEW_PLAYER:
                 retval.append(ev[1])
         # return the info list
         return retval
@@ -154,7 +130,7 @@ class MudServer(object):
         for ev in self._events:
             # if the event is a player disconnect occurence, add the info to
             # the list
-            if ev[0] == self._EVENT_PLAYER_LEFT:
+            if ev[0] == ServerEvents.PLAYER_LEFT:
                 retval.append(ev[1])
         # return the info list
         return retval
@@ -171,7 +147,7 @@ class MudServer(object):
         # go through all the events in the main list
         for ev in self._events:
             # if the event is a command occurence, add the info to the list
-            if ev[0] == self._EVENT_COMMAND:
+            if ev[0] == ServerEvents.COMMAND:
                 retval.append((ev[1], ev[2], ev[3]))
         # return the info list
         return retval
@@ -201,18 +177,13 @@ class MudServer(object):
         self._clients[clid].socket.shutdown(socket.SHUT_RDWR)
 
     def _attempt_send(self, clid, data):
-        # python 2/3 compatability fix - convert non-unicode string to unicode
-        if sys.version < '3' and type(data) != unicode:
-            data = unicode(data, "latin1")
+        # look up the client in the client map and use 'sendall' to send
+        # the message string on the socket. 'sendall' ensures that all of
+        # the data is sent in one go
+        client = self._clients.get(clid)
         try:
-            # look up the client in the client map and use 'sendall' to send
-            # the message string on the socket. 'sendall' ensures that all of
-            # the data is sent in one go
-            self._clients[clid].socket.sendall(bytearray(data, "latin1"))
-        # KeyError will be raised if there is no client with the given id in
-        # the map
-        except KeyError:
-            pass
+            if client:
+                client.socket.sendall(bytearray(data, "latin1"))
         # If there is a connection problem with the client (e.g. they have
         # disconnected) a socket error will be raised
         except socket.error:
@@ -243,12 +214,12 @@ class MudServer(object):
 
         # construct a new _Client object to hold info about the newly connected
         # client. Use 'nextid' as the new client's id number
-        self._clients[self._nextid] = MudServer._Client(joined_socket, addr[0],
-                                                        "", time.time())
+        self._clients[self._nextid] =\
+            SocketClient(joined_socket, addr[0], "", time.time())
 
         # add a new player occurence to the new events list with the player's
         # id number
-        self._new_events.append((self._EVENT_NEW_PLAYER, self._nextid))
+        self._new_events.append((ServerEvents.NEW_PLAYER, self._nextid))
 
         # add 1 to 'nextid' so that the next client to connect will get a
         # unique id number
@@ -297,11 +268,7 @@ class MudServer(object):
                 # process the data, stripping out any special Telnet commands
                 message = self._process_sent_data(cl, data)
 
-                # if there was a message in the data
                 if message:
-
-                    # remove any spaces, tabs etc from the start and end of
-                    # the message
                     message = message.strip()
 
                     # separate the message into the command (the first word)
@@ -310,8 +277,9 @@ class MudServer(object):
 
                     # add a command occurence to the new events list with the
                     # player's id number, the command and its parameters
-                    self._new_events.append((self._EVENT_COMMAND, id,
-                                             command.lower(), params))
+                    self._new_events.append(
+                        (ServerEvents.COMMAND, id, command.lower(), params)
+                    )
 
             # if there is a problem reading from the socket (e.g. the client
             # has disconnected) a socket error will be raised
@@ -325,7 +293,7 @@ class MudServer(object):
 
         # add a 'player left' occurence to the new events list, with the
         # player's id number
-        self._new_events.append((self._EVENT_PLAYER_LEFT, clid))
+        self._new_events.append((ServerEvents.PLAYER_LEFT, clid))
 
     def _process_sent_data(self, client, data):
 
