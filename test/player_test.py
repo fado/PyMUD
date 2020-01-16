@@ -1,14 +1,14 @@
 # TODO: I think these should be in a separate directory
 
 import unittest
-from models import player_classes
+from lib.player import Player
 
 
 class PlayerTests(unittest.TestCase):
 
     @staticmethod
     def _createPlayer():
-        return player_classes.Player("fado", 100)
+        return Player("fado", 100)
 
     def testTakeDamage(self):
         player = self._createPlayer()
