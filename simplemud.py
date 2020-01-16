@@ -193,6 +193,8 @@ while True:
             # send the new player the description of their current room
             mud.send_message(id, rooms[players[id]["room"]]["description"])
 
+            continue
+
         # each of the possible commands is handled below. Try adding new
         # commands to the game!
 
