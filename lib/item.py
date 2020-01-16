@@ -1,5 +1,6 @@
 import uuid
 
+
 class Inventory(object):
     def __init__(self):
         # Probably want to extend this so you can have many items of the same name
@@ -21,14 +22,14 @@ class Inventory(object):
         return self.inventory.get(item.uuid) != False
 
 
-class Item(object):
+class Entity(object):
     def __init__(self, name, description):
         self.uuid = uuid.uuid4()
         self.name = name
         self.description = description
 
 
-class Weapon(Item):
+class Weapon(Entity):
     def __init__(self, name: str, description: str, damage: int):
         self.damage = damage
         super().__init__(name, description)
