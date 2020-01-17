@@ -5,16 +5,10 @@ def greet_players(player_list, mud):
 
         # add the new player to the dictionary, noting that they've not been
         # named yet.
-        # The dictionary key is the player's id number. We set their room to
-        # None initially until they have entered a name
-        # Try adding more player stats - level, gold, inventory, etc
-        player_list[connected_player] = {
-            "name": None,
-            "room": None,
-        }
+        player_list[connected_player.client.uuid] = connected_player
 
         # send the new player a prompt for their name
-        mud.send_message(connected_player, "What is your name?")
+        mud.send_message(connected_player.client.uuid, "What is your name?")
 
 
 def remove_disconnected_players(player_list, mud):

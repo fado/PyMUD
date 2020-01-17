@@ -1,7 +1,8 @@
 from game_data import players, rooms, mud
-
+from lib.models.client import Client
 
 commands = dict()
+
 
 def register_command(function):
     commands[function.__name__] = function
@@ -11,6 +12,7 @@ def register_command(function):
 @register_command
 def quit(id, params=None):
     mud.disconnect(id)
+
 
 @register_command
 def help(id, params=None):
@@ -23,38 +25,41 @@ def help(id, params=None):
     mud.send_message(id, "  go <exit>      - Moves through the exit "
                             + "specified, e.g. 'go outside'")
 
-@register_command
-def say(id, params):
-    # go through every player in the game
-    for pid, pl in players.items():
-        # if they're in the same room as the player
-        if players[pid]["room"] == players[id]["room"]:
-            # send them a message telling them what the player said
-            mud.send_message(pid, "{} says: {}".format(players[id]["name"], params))
 
 @register_command
-def look(id, params=None):
+def say(player: Client, message):
+    # go through every player in the game
+    for other_player in players.values():
+        # if they're in the same room as the player
+        if other_player.room == player.room:
+            # send them a message telling them what the player said
+            mud.send_message(other_player, f"{player.name} says: {message}")
+
+
+@register_command
+def look(player: Client, params=None):
     # store the player's current room
-    rm = rooms[players[id]["room"]]
+    rm = rooms[player.room]
 
     # send the player back the description of their current room
-    mud.send_message(id, rm["description"])
+    mud.send_message(player.uuid, rm["description"])
 
     playershere = []
     # go through every player in the game
-    for pid, pl in players.items():
+    for other_player in players.values():
         # if they're in the same room as the player
-        if players[pid]["room"] == players[id]["room"]:
+        if other_player.room == player.room:
             # ... and they have a name to be shown
-            if players[pid]["name"] is not None:
+            if other_player.name is not None:
                 # add their name to the list
-                playershere.append(players[pid]["name"])
+                playershere.append(other_player.name)
 
     # send player a message containing the list of players in the room
-    mud.send_message(id, "Players here: {}".format(", ".join(playershere)))
+    mud.send_message(player, "Players here: {}".format(", ".join(playershere)))
 
     # send player a message containing the list of exits from this room
-    mud.send_message(id, "Exits are: {}".format(", ".join(rm["exits"])))
+    mud.send_message(player, "Exits are: {}".format(", ".join(rm["exits"])))
+
 
 @register_command
 def go(id, params):
