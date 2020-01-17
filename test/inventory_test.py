@@ -1,6 +1,6 @@
 import unittest
 
-from lib.models.item import Inventory, Entity
+from lib.models.entity import Inventory, Entity
 
 
 class InventoryTest(unittest.TestCase):
