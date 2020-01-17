@@ -3,6 +3,8 @@ from lib.models.client import Client
 
 commands = dict()
 
+# TODO: Tests. We probably need to mock the mudserver though,
+# or somehow change these so they're not just side effects
 
 def register_command(function):
     commands[function.__name__] = function
@@ -10,20 +12,20 @@ def register_command(function):
 
 
 @register_command
-def quit(id, params=None):
+def quit(client: Client, params=None):
     mud.disconnect(id)
 
 
 @register_command
-def help(id, params=None):
+def help(client: Client, params=None):
     # send the player back the list of possible commands
-    mud.send_message(id, "Commands:")
-    mud.send_message(id, "  say <message>  - Says something out loud, "
-                            + "e.g. 'say Hello'")
-    mud.send_message(id, "  look           - Examines the "
-                            + "surroundings, e.g. 'look'")
-    mud.send_message(id, "  go <exit>      - Moves through the exit "
-                            + "specified, e.g. 'go outside'")
+    mud.send_message(client.uuid, "Commands:")
+    mud.send_message(client.uuid, "  say <message>  - Says something out loud,"
+                                  "e.g. 'say Hello'")
+    mud.send_message(client.uuid, "  look           - Examines the "
+                                  "surroundings, e.g. 'look'")
+    mud.send_message(client.uuid, "  go <exit>      - Moves through the exit "
+                                  "specified, e.g. 'go outside'")
 
 
 @register_command
@@ -50,7 +52,7 @@ def look(player: Client, params=None):
         # if they're in the same room as the player
         if other_player.room == player.room:
             # ... and they have a name to be shown
-            if other_player.name is not None:
+            if other_player.name:
                 # add their name to the list
                 playershere.append(other_player.name)
 
@@ -62,12 +64,12 @@ def look(player: Client, params=None):
 
 
 @register_command
-def go(id, params):
+def go(player: Client, params):
     # store the exit name   
     ex = params.lower()
 
     # store the player's current room
-    rm = rooms[players[id]["room"]]
+    rm = rooms[player.room]
 
     # if the specified exit is found in the room's exits list
     if ex in rm["exits"]:

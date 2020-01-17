@@ -23,9 +23,9 @@ author: Mark Frimston - mfrimston@gmail.com
 
 import time
 
-import mud_util
+from lib import mud_util
 from game_data import mud, players, rooms
-from command import commands
+from lib.command import commands
 
 
 # main game loop. We loop forever (i.e. until the program is terminated)

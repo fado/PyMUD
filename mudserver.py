@@ -7,6 +7,7 @@ server running then used to send and receive messages from players.
 author: Mark Frimston - mfrimston@gmail.com
 """
 
+# TODO: Tests
 
 import socket
 import time
@@ -124,8 +125,8 @@ class MudServer(object):
         # stop listening for new clients
         self._server_socket.close()
 
-    def disconnect(self, clid):
-        self._clients[clid].socket.shutdown(socket.SHUT_RDWR)
+    def disconnect(self, client: Client):
+        client.socket.shutdown(socket.SHUT_RDWR)
 
     def _attempt_send(self, clid, data):
         # look up the client in the client map and use 'sendall' to send
