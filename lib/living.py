@@ -39,10 +39,10 @@ class Living(Entity):
     def get_passive_perception(self) -> int:
         raise NotImplementedError
 
-    def take_damage(self, damage) -> int:
+    def take_damage(self, damage: int) -> int:
         self.current_hp -= damage
         return self.current_hp
 
-    def heal(self, amount) -> int:
+    def heal(self, amount: int) -> int:
         self.current_hp += amount
         return self.current_hp
