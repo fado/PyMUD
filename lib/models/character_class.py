@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List
 
 
-from lib.enums import Ability, ArmorType, WeaponType
+from lib.models.enums import Ability, ArmorType, WeaponType
 
 
 @dataclass

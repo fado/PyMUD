@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import List, Dict
 
-from lib.character_class import CharacterClass
-from lib.entity import *
-from lib.enums import Ability, Skill, Alignment
+from lib.models.character_class import CharacterClass
+from lib.models.entity import *
+from lib.models.enums import Ability, Skill, Alignment
 
 
 @dataclass

@@ -16,7 +16,6 @@ class Weapon(Entity):
 
 class Inventory(object):
     def __init__(self):
-        # Probably want to extend this so you can have many items of the same name
         self.inventory = {}
 
     def add_item(self, item: Entity) -> str:

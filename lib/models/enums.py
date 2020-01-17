@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class ExitType(Enum):
     DOOR = 'door'
     PATH = 'path'

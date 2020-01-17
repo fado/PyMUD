@@ -1,8 +1,8 @@
 import unittest
 
-from lib.character_class import CharacterClass
-from lib.enums import Alignment, Ability, Skill
-from lib.living import Living
+from lib.models.character_class import CharacterClass
+from lib.models.enums import Alignment, Ability, Skill
+from lib.models.living import Living
 
 
 class LivingTests(unittest.TestCase):
