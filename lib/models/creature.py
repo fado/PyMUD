@@ -33,6 +33,24 @@ class Creature(Entity):
         print(self.abilities)
         return (value - 10) // 2
 
+    def get_strength_modifier(self) -> int:
+        return self.get_modifier(Ability.STRENGTH)
+
+    def get_dexterity_modifier(self) -> int:
+        return self.get_modifier(Ability.DEXTERITY)
+
+    def get_constitution_modifier(self) -> int:
+        return self.get_modifier(Ability.CONSTITUTION)
+
+    def get_wisdom_modifier(self) -> int:
+        return self.get_modifier(Ability.WISDOM)
+
+    def get_intelligence_modifier(self) -> int:
+        return self.get_modifier(Ability.INTELLIGENCE)
+
+    def get_charisma_modifier(self) -> int:
+        return self.get_modifier(Ability.CHARISMA)
+
     def get_initiative(self) -> int:
         raise NotImplementedError
 

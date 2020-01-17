@@ -69,5 +69,31 @@ class creatureTests(unittest.TestCase):
         creature = self._createCreature()
         self.assertEqual(creature.get_modifier(Ability.CHARISMA), -4)
 
+    def testGetStrengthModifierForHumans(self):
+        creature = self._createCreature()
+        self.assertEqual(creature.get_strength_modifier(), 8)
+
+    def testGetDexModifierForHumans(self):
+        creature = self._createCreature()
+        self.assertEqual(creature.get_dexterity_modifier(), 2)
+
+    def testGetConhModifierForHumans(self):
+        creature = self._createCreature()
+        self.assertEqual(creature.get_constitution_modifier(), 1)
+    
+    def testGetWisModifierForHumans(self):
+        creature = self._createCreature()
+        self.assertEqual(creature.get_wisdom_modifier(), 0)
+
+    def testGetInthModifierForHumans(self):
+        creature = self._createCreature()
+        self.assertEqual(creature.get_intelligence_modifier(), -2)
+    
+    def testGetChaModifierForHumans(self):
+        creature = self._createCreature()
+        self.assertEqual(creature.get_charisma_modifier(), -4)
+
+
+
 if __name__ == '__main__':
     unittest.main()
