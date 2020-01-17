@@ -2,14 +2,14 @@ import unittest
 
 from lib.models.character_class import CharacterClass
 from lib.models.enums import Alignment, Ability, Skill
-from lib.models.living import Living
+from lib.models.creature import Creature
 
 
-class LivingTests(unittest.TestCase):
+class creatureTests(unittest.TestCase):
 
     @staticmethod
-    def _createLiving():
-        return Living(
+    def _createCreature():
+        return Creature(
             name = 'Fado',
             description = 'Fado stands before you.',
             character_class = None,
@@ -38,36 +38,36 @@ class LivingTests(unittest.TestCase):
         )
 
     def testTakeDamage(self):
-        living = self._createLiving()
-        self.assertEqual(living.take_damage(10), 90)
+        creature = self._createCreature()
+        self.assertEqual(creature.take_damage(10), 90)
 
     def testHeal(self):
-        living = self._createLiving()
-        self.assertEqual(living.heal(10), 110)
+        creature = self._createCreature()
+        self.assertEqual(creature.heal(10), 110)
 
     def testGetStrengthModifier(self):
-        living = self._createLiving()
-        self.assertEqual(living.get_modifier(Ability.STRENGTH), 8)
+        creature = self._createCreature()
+        self.assertEqual(creature.get_modifier(Ability.STRENGTH), 8)
 
     def testGetDexModifier(self):
-        living = self._createLiving()
-        self.assertEqual(living.get_modifier(Ability.DEXTERITY), 2)
+        creature = self._createCreature()
+        self.assertEqual(creature.get_modifier(Ability.DEXTERITY), 2)
 
     def testGetConhModifier(self):
-        living = self._createLiving()
-        self.assertEqual(living.get_modifier(Ability.CONSTITUTION), 1)
+        creature = self._createCreature()
+        self.assertEqual(creature.get_modifier(Ability.CONSTITUTION), 1)
     
     def testGetWisModifier(self):
-        living = self._createLiving()
-        self.assertEqual(living.get_modifier(Ability.WISDOM), 0)
+        creature = self._createCreature()
+        self.assertEqual(creature.get_modifier(Ability.WISDOM), 0)
 
     def testGetInthModifier(self):
-        living = self._createLiving()
-        self.assertEqual(living.get_modifier(Ability.INTELLIGENCE), -2)
+        creature = self._createCreature()
+        self.assertEqual(creature.get_modifier(Ability.INTELLIGENCE), -2)
     
     def testGetChaModifier(self):
-        living = self._createLiving()
-        self.assertEqual(living.get_modifier(Ability.CHARISMA), -4)
+        creature = self._createCreature()
+        self.assertEqual(creature.get_modifier(Ability.CHARISMA), -4)
 
 if __name__ == '__main__':
     unittest.main()

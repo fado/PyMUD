@@ -7,7 +7,7 @@ from lib.models.enums import Ability, Skill, Alignment
 
 
 @dataclass
-class Living(Entity):
+class Creature(Entity):
     name: str
     description: str
     character_class: CharacterClass 
