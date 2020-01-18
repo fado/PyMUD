@@ -2,7 +2,7 @@ import uuid
 
 
 class Entity(object):
-    def __init__(self, name, description):
+    def __init__(self, name=None, description=None):
         self.uuid = uuid.uuid4()
         self.name = name
         self.description = description

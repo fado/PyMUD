@@ -1,34 +1,46 @@
+from typing import List
+
+from game_data import players, mud, game, rooms
+from lib.models.player import Player
 
 # TODO: Tests
 
-def greet_players(player_list, mud):
+def handle_new_connections():
     for event in mud.get_new_player_events():
-        connected_player = event.client
+        
+        new_client = event.client
+        new_player = Player(new_client)
 
-        # add the new player to the dictionary, noting that they've not been
-        # named yet.
-        player_list[connected_player.uuid] = connected_player
+        game.add_player(new_player)
 
-        # send the new player a prompt for their name
-        mud.send_message(connected_player.uuid, "What is your name?")
+        tell_player(new_player, "What is your name?")
 
 
-def remove_disconnected_players(player_list, mud):
+def handle_disconnects():
     for event in mud.get_disconnected_player_events():
-        player = event.client
+        
+        disconnected_client = event.client
 
-        # if for any reason the player isn't in the player map, skip them and
-        # move on to the next one
-        if player not in player_list:
+        disconnected_player = find_player_by_client_id(disconnected_client.uuid)
+        if not disconnected_player:
             continue
 
-        # TODO: This is probably broke
-        # go through all the players in the game
-        for pid, pl in player_list.items():
-            # send each player a message to tell them about the disconnected
-            # player
-            mud.send_message(pid, "{} quit the game".format(
-                player_list[player]["name"]))
+        for player_id, player in game.players.items():
+            tell_player(player, "{} quit the game".format(disconnected_player))
 
-        # remove the player's entry in the player dictionary
-        del(player_list[player])
+        game.remove_player(disconnected_player)
+
+
+def tell_player(player: Player, message: str):
+    mud.send_message(player.client.uuid, message)
+
+
+def broadcast(message: str):
+    for player in game.players.values():
+        tell_player(player, message)
+
+
+def find_player_by_client_id(client_id: str) -> Player:
+    for player_id, player in game.players.items():
+        if player.client.uuid == client_id:
+            return player

@@ -23,7 +23,7 @@ author: Mark Frimston - mfrimston@gmail.com
 
 import time
 
-from lib import mud_util
+from lib.mud_util import *
 from game_data import mud, players, rooms
 from lib.command import commands
 
@@ -40,49 +40,43 @@ while True:
     mud.update()
 
     # go through any newly connected players
-    mud_util.greet_players(players, mud)
+    new_players = handle_new_connections()
 
     # go through any recently disconnected players
-    mud_util.remove_disconnected_players(players, mud)
+    handle_disconnects()
 
     # go through any new commands sent from players
     for event in mud.get_commands():
         client = event.client
         command = event.command
         params = event.params
+        
+        player = find_player_by_client_id(client.uuid)
 
         # if for any reason the player isn't in the player map, skip them and
         # move on to the next one
-        if client.uuid not in players:
+        if not player:
             continue
 
-        # if the player hasn't given their name yet, use this first command as
-        # their name and move them to the starting room.
-        if client.name is None:
-            print("yet")
+        if player.name is None:
+            # Any new command event will become the player's name.
+            player.name = event.command
+    
+            broadcast(f"{player.name} entered the game.")
 
-            client.name = command
-            client.room = "Tavern"
+            tell_player(player, f"Welcome to the game, {player.name}.")
+            tell_player(player, "Type 'help' for a list of commands. Have fun!")
+            tell_player(player, rooms[player.location]["description"])
 
-            # go through all the players in the game
-            for player in players.keys():
-                # send each player a message to tell them about the new player
-                mud.send_message(player, f"{client.name} entered the game")
-
-            # send the new player a welcome message
-            # TODO: A nicer interface to send_message so you don't need to do .uuid
-            mud.send_message(client.uuid, f"Welcome to the game, {client.name}.")
-            mud.send_message(client.uuid, "Type 'help' for a list of commands. Have fun!")
-            mud.send_message(client.uuid, rooms[client.room]["description"])
             continue
 
         # each of the possible commands is handled below. Try adding new
         # commands to the game!
 
         if command in commands.keys():
-            commands[command](client, params)
+            commands[command](player, params)
 
         # some other, unrecognised command
         else:
             # send back an 'unknown command' message
-            mud.send_message(client, "Unknown command '{}'".format(command))
+            tell_player(player, "Unknown command '{}'".format(command))

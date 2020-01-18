@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Dict
 
+from lib.constants import DEFAULT_START_LOCATION
 from lib.models.character_class import CharacterClass
 from lib.models.entity import *
 from lib.models.enums import Ability, Skill, Alignment
@@ -14,12 +15,12 @@ class Creature(Entity):
     _DEFAULT_AC = 10
 
     def __init__(self,
-                 name: str = "",
-                 description: str = "",
+                 name: str = None,
+                 description: str = None,
                  character_class: CharacterClass = None,
                  level: int = _DEFAULT_LEVEL,
-                 background: str = "",
-                 race: str = "",
+                 background: str = None,
+                 race: str = None,
                  alignment: Alignment = None,
                  xp: int = _DEFAULT_XP,
                  abilities: Dict[Ability, int] = None,
@@ -30,8 +31,6 @@ class Creature(Entity):
                  hd_total: int = 0,
                  inventory: Inventory = None):
 
-        self.name = name
-        self.description = description
         self.character_class = character_class
         self.level = level
         self.background = background
@@ -49,8 +48,9 @@ class Creature(Entity):
         self.death_save_success: int = 0
         self.death_save_failure: int = 0
         self.inventory: Inventory = inventory
+        self.location = DEFAULT_START_LOCATION
 
-        super().__init__(self.name, self.description)
+        super().__init__()
 
     def get_modifier(self, ability: Ability) -> int:
         value = self.abilities.get(ability)
