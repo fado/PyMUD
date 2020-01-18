@@ -75,32 +75,30 @@ def go(player: Client, params):
     if ex in rm["exits"]:
 
         # go through all the players in the game
-        for pid, pl in players.items():
+        for client in players.values():
             # if player is in the same room and isn't the player
             # sending the command
-            if players[pid]["room"] == players[id]["room"] \
-                    and pid != id:
+            if client.room == player.room and client.uuid != player.uuid:
                 # send them a message telling them that the player
                 # left the room
-                mud.send_message(pid, "{} left via exit '{}'".format(
-                                                players[id]["name"], ex))
+                mud.send_message(client.uuid, "{} left via exit '{}'".format(players[client.uuid].name, ex))
 
         # update the player's current room to the one the exit leads to
-        players[id]["room"] = rm["exits"][ex]
-        rm = rooms[players[id]["room"]]
+        players[player.uuid].room = rm["exits"][ex]
+        rm = rooms[players[player.uuid].room]
 
         # go through all the players in the game
-        for pid, pl in players.items():
+        for client in players.values():
             # if player is in the same (new) room and isn't the player
             # sending the command
-            if players[pid]["room"] == players[id]["room"] \
-                    and pid != id:
+            if client.room == player.room \
+                    and client.uuid != player.uuid:
                 # send them a message telling them that the player
                 # entered the room
-                mud.send_message(pid, "{} arrived via exit '{}'".format(players[id]["name"], ex))
+                mud.send_message(client.uuid, "{} arrived via exit '{}'".format(players[client.uuid].name, ex))
 
         # send the player a message telling them where they are now
-        mud.send_message(id, "You arrive at '{}'".format(players[id]["room"]))
+        mud.send_message(player.uuid, "You arrive at '{}'".format(players[player.uuid].room))
 
     # the specified exit wasn't found in the current room
     else:
