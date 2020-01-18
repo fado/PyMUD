@@ -2,7 +2,7 @@
 # TODO: Tests
 
 def greet_players(player_list, mud):
-    for event in mud.get_new_players():
+    for event in mud.get_new_player_events():
         connected_player = event.client
 
         # add the new player to the dictionary, noting that they've not been
@@ -14,7 +14,7 @@ def greet_players(player_list, mud):
 
 
 def remove_disconnected_players(player_list, mud):
-    for event in mud.get_disconnected_players():
+    for event in mud.get_disconnected_player_events():
         player = event.client
 
         # if for any reason the player isn't in the player map, skip them and

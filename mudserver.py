@@ -66,14 +66,14 @@ class MudServer(object):
         self._events = list(self._new_events)
         self._new_events = []
 
-    def get_new_players(self):
+    def get_new_player_events(self) -> List[Event]:
         """Returns a list containing info on any new players that have
         entered the game since the last call to 'update'. Each item in
         the list is a player id number.
         """
         return self.get_events(ServerEvents.NEW_PLAYER)
 
-    def get_disconnected_players(self):
+    def get_disconnected_player_events(self) -> List[Event]:
         """Returns a list containing info on any players that have left
         the game since the last call to 'update'. Each item in the list
         is a player id number.
