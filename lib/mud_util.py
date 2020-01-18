@@ -8,7 +8,6 @@ def greet_players(player_list, mud):
         # add the new player to the dictionary, noting that they've not been
         # named yet.
         player_list[connected_player.uuid] = connected_player
-        print(player_list)
 
         # send the new player a prompt for their name
         mud.send_message(connected_player.uuid, "What is your name?")

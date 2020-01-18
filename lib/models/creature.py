@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Dict
 
 from lib.models.character_class import CharacterClass
@@ -6,27 +6,51 @@ from lib.models.entity import *
 from lib.models.enums import Ability, Skill, Alignment
 
 
-@dataclass
 class Creature(Entity):
-    name: str
-    description: str
-    character_class: CharacterClass 
-    level: int
-    background: str
-    race: str
-    alignment: Alignment
-    xp: int
-    abilities: Dict[Ability, int]
-    skills: List[Skill]
-    max_hp: int
-    current_hp: int
-    temporary_hp: int
-    armor_class: int
-    hd_value: int
-    hd_total: int
-    death_save_success: int = 0
-    death_save_failure: int = 0
-    inventory: Inventory = Inventory()
+
+    _DEFAULT_LEVEL = 0
+    _DEFAULT_XP = 0
+    _DEFAULT_HP = 1
+    _DEFAULT_AC = 10
+
+    def __init__(self,
+                 name: str = "",
+                 description: str = "",
+                 character_class: CharacterClass = None,
+                 level: int = _DEFAULT_LEVEL,
+                 background: str = "",
+                 race: str = "",
+                 alignment: Alignment = None,
+                 xp: int = _DEFAULT_XP,
+                 abilities: Dict[Ability, int] = None,
+                 skills: List[Skill] = None,
+                 max_hp: int = _DEFAULT_HP, 
+                 armor_class: int = _DEFAULT_AC,
+                 hd_value: int = 0,
+                 hd_total: int = 0,
+                 inventory: Inventory = None):
+
+        self.name = name
+        self.description = description
+        self.character_class = character_class
+        self.level = level
+        self.background = background
+        self.race = race
+        self.alignment = alignment
+        self.xp = xp
+        self.abilities = abilities
+        self.skills = skills
+        self.max_hp = max_hp
+        self.current_hp: int = self.max_hp
+        self.temporary_hp: int = 0
+        self.armor_class = armor_class
+        self.hd_value = hd_value
+        self.hd_total = hd_total
+        self.death_save_success: int = 0
+        self.death_save_failure: int = 0
+        self.inventory: Inventory = inventory
+
+        super().__init__(self.name, self.description)
 
     def get_modifier(self, ability: Ability) -> int:
         value = self.abilities.get(ability)
