@@ -7,7 +7,7 @@ _MAPPINGS = {
 }
 
 
-def process(client, data):
+def process(data):
     # the Telnet protocol allows special command codes to be inserted into
     # messages. For our very simple server we don't need to response to
     # any of these codes, but we must at least detect and skip over them
@@ -19,6 +19,7 @@ def process(client, data):
     message = None
     state = ReadState.NORMAL
 
+    buffer = []
     for character in data:
-        message, state, client = _MAPPINGS[state](message, state, client, character)
+        message, state, buffer = _MAPPINGS[state](message, state, buffer, character)
     return message
