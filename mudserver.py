@@ -31,9 +31,9 @@ class MudServer(object):
     running.
     """
 
-    # list of occurences waiting to be handled by the code
+    # list of occurrences waiting to be handled by the code
     _events: List[Event] = []
-    # list of newly-added occurences
+    # list of newly-added occurrences
     _new_events = []
 
     def __init__(self, interface="0.0.0.0", port=1234):
@@ -149,6 +149,7 @@ class MudServer(object):
             self._new_events.append(
                 Event(ServerEvents.NEW_PLAYER, client)
             )
+            print(self._new_events)
 
     def _check_for_disconnected(self):
 
@@ -182,7 +183,7 @@ class MudServer(object):
             except socket.error:
                 self._handle_disconnect(client)
 
-    def _handle_disconnect(self, client):
+    def _handle_disconnect(self, client: Client):
         # remove the client from the clients map
         del(self._clients[client.uuid])
 
