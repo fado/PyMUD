@@ -1,6 +1,18 @@
 from enum import Enum
 
 
+class Obscuration(Enum):
+    NONE = 'None'
+    LIGHT = 'lightly obscured'
+    HEAVY = 'heavily obscured'
+
+
+class LightLevel(Enum):
+    BRIGHT = 'bright light'
+    DIM = 'dim light'
+    DARKNESS = 'darkness'
+
+
 class ExitType(Enum):
     DOOR = 'door'
     PATH = 'path'
