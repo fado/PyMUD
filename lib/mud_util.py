@@ -5,7 +5,7 @@ from lib.models.player import Player
 
 # TODO: Tests
 
-def handle_new_connections():
+def handle_player_join():
     for event in game.server.get_new_player_events():
         
         new_client = event.client
@@ -16,7 +16,7 @@ def handle_new_connections():
         tell_player(new_player, "What is your name?")
 
 
-def handle_disconnects():
+def handle_player_leave():
     for event in game.server.get_disconnected_player_events():
         
         disconnected_client = event.client

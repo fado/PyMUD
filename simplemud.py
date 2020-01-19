@@ -40,10 +40,10 @@ while True:
     game.update()
 
     # go through any newly connected players
-    new_players = handle_new_connections()
+    new_players = handle_player_join()
 
     # go through any recently disconnected players
-    handle_disconnects()
+    handle_player_leave()
 
     # go through any new commands sent from players
     for event in game.server.get_commands():
