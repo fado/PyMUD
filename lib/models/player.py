@@ -1,10 +1,10 @@
-from dataclasses import dataclass
+from abc import ABC
 
 from lib.models.client import Client
 from lib.models.creature import Creature
 
 
-class Player(Creature):
+class Player(Creature, ABC):
 
     def __init__(self, client: Client, creature: Creature = None):
         self.client = client

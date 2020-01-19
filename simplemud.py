@@ -23,10 +23,13 @@ author: Mark Frimston - mfrimston@gmail.com
 
 import time
 
-from game_data import game
-from lib.mud_util import *
-from lib.command import commands
+from game_data import rooms
+from lib.command import Commands
+from lib.models.game_state import GameState
+from mudserver import MudServer
 
+game = GameState(MudServer())
+commands = Commands(game)
 
 # main game loop. We loop forever (i.e. until the program is terminated)
 while True:
@@ -40,10 +43,10 @@ while True:
     game.update()
 
     # go through any newly connected players
-    new_players = handle_player_join()
+    new_players = game.handle_player_join()
 
     # go through any recently disconnected players
-    handle_player_leave()
+    game.handle_player_leave()
 
     # go through any new commands sent from players
     for event in game.server.get_commands():
@@ -51,7 +54,7 @@ while True:
         command = event.command
         params = event.params
         
-        player = find_player_by_client_id(client.uuid)
+        player = game.find_player_by_client_id(client.uuid)
 
         # if for any reason the player isn't in the player map, skip them and
         # move on to the next one
@@ -62,21 +65,14 @@ while True:
             # Any new command event will become the player's name.
             player.name = event.command
     
-            broadcast(f"{player.name} entered the game.")
+            game.broadcast(f"{player.name} entered the game.")
 
-            tell_player(player, f"Welcome to the game, {player.name}.")
-            tell_player(player, "Type 'help' for a list of commands. Have fun!")
-            tell_player(player, rooms[player.location]["description"])
+            game.tell_player(player, f"Welcome to the game, {player.name}.")
+            game.tell_player(player, "Type 'help' for a list of commands. Have fun!")
+            game.tell_player(player, rooms[player.location]["description"])
 
             continue
 
         # each of the possible commands is handled below. Try adding new
         # commands to the game!
-
-        if command in commands.keys():
-            commands[command](player, params)
-
-        # some other, unrecognised command
-        else:
-            # send back an 'unknown command' message
-            tell_player(player, "Unknown command '{}'".format(command))
+        commands.execute_command(player, command, params)
