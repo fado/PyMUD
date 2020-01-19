@@ -1,0 +1,1 @@
+DEFAULT_START_LOCATION = 'Tavern'

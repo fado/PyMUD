@@ -1,4 +1,6 @@
+from lib.models.game_state import GameState
 from mudserver import MudServer
+
 
 # structure defining the rooms in the game. Try adding more rooms to the game!
 rooms = {
@@ -12,7 +14,4 @@ rooms = {
     }
 }
 
-players = {}
-
-# start the server
-mud = MudServer()
+game = GameState(MudServer())

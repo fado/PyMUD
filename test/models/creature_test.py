@@ -30,8 +30,6 @@ class creatureTests(unittest.TestCase):
                 Skill.PERCEPTION
             ],
             max_hp = 100,
-            current_hp = 100,
-            temporary_hp = 0,
             armor_class = 18,
             hd_value = 10,
             hd_total = 4,

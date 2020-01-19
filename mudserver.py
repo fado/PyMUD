@@ -66,14 +66,14 @@ class MudServer(object):
         self._events = list(self._new_events)
         self._new_events = []
 
-    def get_new_players(self):
+    def get_new_player_events(self) -> List[Event]:
         """Returns a list containing info on any new players that have
         entered the game since the last call to 'update'. Each item in
         the list is a player id number.
         """
         return self.get_events(ServerEvents.NEW_PLAYER)
 
-    def get_disconnected_players(self):
+    def get_disconnected_player_events(self) -> List[Event]:
         """Returns a list containing info on any players that have left
         the game since the last call to 'update'. Each item in the list
         is a player id number.
@@ -126,7 +126,7 @@ class MudServer(object):
         self._server_socket.close()
 
     def disconnect(self, client: Client):
-        client.socket.shutdown(socket.SHUT_RDWR)
+        client.socket.socket.shutdown(socket.SHUT_RDWR)
 
     def _attempt_send(self, clid, data):
         # look up the client in the client map and use 'sendall' to send
@@ -139,7 +139,7 @@ class MudServer(object):
         # If there is a connection problem with the client (e.g. they have
         # disconnected) a socket error will be raised
         except socket.error:
-            self._handle_disconnect(clid)
+            self._handle_disconnect(client)
 
     def _check_for_new_connections(self):
         new_client_socket = self._server_socket.check_for_new_clients()
@@ -180,12 +180,12 @@ class MudServer(object):
             # if there is a problem reading from the socket (e.g. the client
             # has disconnected) a socket error will be raised
             except socket.error:
-                self._handle_disconnect(id)
+                self._handle_disconnect(client)
 
-    def _handle_disconnect(self, clid):
+    def _handle_disconnect(self, client):
         # remove the client from the clients map
-        del(self._clients[clid])
+        del(self._clients[client.uuid])
 
         # add a 'player left' occurence to the new events list, with the
         # player's id number
-        self._new_events.append((ServerEvents.PLAYER_LEFT, clid))
+        self._new_events.append(Event(ServerEvents.PLAYER_LEFT, client))
