@@ -95,7 +95,6 @@ class MudServer(object):
         # go through all the events in the main list
         for ev in self._events:
             # if the event is a command occurrence, add the info to the list
-            print(ev)
             if ev.event_type == event_type:
                 retval.append(ev)
         # return the info list
