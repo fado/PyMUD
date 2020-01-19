@@ -14,30 +14,30 @@ def register_command(function):
 
 
 @register_command
-def quit(client: Client, params=None):
-    mud.disconnect(id)
+def quit(player: Player, params=None):
+    mud.disconnect(player.client.uuid)
 
 
 @register_command
-def help(client: Client, params=None):
+def help(player: Player, params=None):
     # send the player back the list of possible commands
-    mud.send_message(client.uuid, "Commands:")
-    mud.send_message(client.uuid, "  say <message>  - Says something out loud,"
+    tell_player(player, "Commands:")
+    tell_player(player, "  say <message>  - Says something out loud,"
                                   "e.g. 'say Hello'")
-    mud.send_message(client.uuid, "  look           - Examines the "
+    tell_player(player, "  look           - Examines the "
                                   "surroundings, e.g. 'look'")
-    mud.send_message(client.uuid, "  go <exit>      - Moves through the exit "
+    tell_player(player, "  go <exit>      - Moves through the exit "
                                   "specified, e.g. 'go outside'")
 
 
 @register_command
-def say(player: Client, message):
+def say(player: Player, message):
     # go through every player in the game
-    for other_player in players.values():
+    for other_player in game.players.values():
         # if they're in the same room as the player
-        if other_player.room == player.room:
+        if other_player.location == player.location:
             # send them a message telling them what the player said
-            mud.send_message(other_player, f"{player.name} says: {message}")
+            tell_player(other_player, f"{player.name} says: {message}")
 
 
 @register_command
@@ -99,7 +99,8 @@ def go(player: Player, params):
                 tell_player(other_player, f"{player.name} arrived via exit '{ex}'")
 
         # send the player a message telling them where they are now
-        tell_player(player, "You arrive at '{player.location}'")
+        tell_player(player, f"You arrive at '{player.location}'")
+        tell_player(player, rooms[player.location]["description"])
 
     # the specified exit wasn't found in the current room
     else:
