@@ -32,7 +32,7 @@ def handle_player_leave():
 
 
 def tell_player(player: Player, message: str):
-    game.server.send_message(player.client.uuid, message)
+    game.server.send_message(player.client, message)
 
 
 def broadcast(message: str):

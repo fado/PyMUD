@@ -83,7 +83,7 @@ def go(player: Player, params):
             if other_player.location == player.location and other_player.uuid != player.uuid:
                 # send them a message telling them that the player
                 # left the room
-                tell_player(other_player.uuid, f"{player.name} left via exit '{ex}'")
+                tell_player(other_player, f"{player.name} left via exit '{ex}'")
 
         # update the player's current room to the one the exit leads to
         player.location = current_location["exits"][ex]
