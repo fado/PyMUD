@@ -1,4 +1,4 @@
-from game_data import players, rooms, mud, game
+from game_data import rooms, game
 from lib.models.client import Client
 from lib.models.player import Player
 from lib.mud_util import *
@@ -15,7 +15,7 @@ def register_command(function):
 
 @register_command
 def quit(player: Player, params=None):
-    mud.disconnect(player.client.uuid)
+    game.server.disconnect(player.client)
 
 
 @register_command

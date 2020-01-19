@@ -23,8 +23,8 @@ author: Mark Frimston - mfrimston@gmail.com
 
 import time
 
+from game_data import game
 from lib.mud_util import *
-from game_data import mud, players, rooms
 from lib.command import commands
 
 
@@ -37,7 +37,7 @@ while True:
 
     # 'update' must be called in the loop to keep the game running and give
     # us up-to-date information
-    mud.update()
+    game.update()
 
     # go through any newly connected players
     new_players = handle_new_connections()
@@ -46,7 +46,7 @@ while True:
     handle_disconnects()
 
     # go through any new commands sent from players
-    for event in mud.get_commands():
+    for event in game.server.get_commands():
         client = event.client
         command = event.command
         params = event.params

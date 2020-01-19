@@ -1,12 +1,12 @@
 from typing import List
 
-from game_data import players, mud, game, rooms
+from game_data import game, rooms
 from lib.models.player import Player
 
 # TODO: Tests
 
 def handle_new_connections():
-    for event in mud.get_new_player_events():
+    for event in game.server.get_new_player_events():
         
         new_client = event.client
         new_player = Player(new_client)
@@ -17,7 +17,7 @@ def handle_new_connections():
 
 
 def handle_disconnects():
-    for event in mud.get_disconnected_player_events():
+    for event in game.server.get_disconnected_player_events():
         
         disconnected_client = event.client
 
@@ -32,7 +32,7 @@ def handle_disconnects():
 
 
 def tell_player(player: Player, message: str):
-    mud.send_message(player.client.uuid, message)
+    game.server.send_message(player.client.uuid, message)
 
 
 def broadcast(message: str):
