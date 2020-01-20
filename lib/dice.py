@@ -1,15 +1,14 @@
-
+from random import randint
 
 class Dice():
-    def __init__(self, sides, number, modifier):
-        global finalroll
+    def roll(self, sides, number, modifier):
         finalroll = 0
         for x in range(0, number):
             roll = (randint(1, sides))
             finalroll = finalroll + roll
         modifiedroll = finalroll + modifier
+        print(modifiedroll)
         return modifiedroll
 
-from random import randint
 d = Dice()
-d.__init__()
+d.roll()
