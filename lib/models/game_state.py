@@ -1,7 +1,7 @@
 from typing import Dict
 
 from mudserver import MudServer
-from lib.models.player import Player
+import lib.models.player
 
 # TODO: Is there too much in this class now?
 # The util didn't make sense anymore, because it was too tightly linked
@@ -33,7 +33,7 @@ class GameState(object):
     def handle_player_join(self):
         for event in self.server.get_new_player_events():
             new_client = event.client
-            new_player = Player(new_client)
+            new_player = Player(new_client, self)
             self.add_player(new_player)
             self.tell_player(new_player, "What is your name?")
 

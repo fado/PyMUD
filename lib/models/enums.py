@@ -1,6 +1,10 @@
 from enum import Enum
 
 
+class SearchType(Enum):
+    PLAYER = 'player'
+
+
 class Obscuration(Enum):
     NONE = 'None'
     LIGHT = 'lightly obscured'

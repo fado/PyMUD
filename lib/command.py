@@ -1,113 +1,116 @@
 from game_data import rooms
-from lib.models.game_state import GameState
 
 from lib.models.player import Player
 
+class CommandSet():
 
-class Commands(object):
-    def __init__(self, game_state: GameState):
-        self.game_state = game_state
-        # The register_command decorator was nicer, but it's harder to do inside a class
-        # we can look at abstracting it out again, but we need to decide whether we want
-        # state to be sent to every command if we do that, or manually register them so
-        # they can be class methods (or do some other type of metaprogramming to register
-        # them inside a class
-        self.commands = {
-            "quit": self.quit,
-            "say": self.say,
-            "help": self.help,
-            "look": self.look,
-            "go": self.go,
+    def __init__(self, caller: Player, commands: Dict[str, Command]):
+        self.caller = caller
+        self.commands = commands
+
+
+class PlayerCommandSet(CommandSet):
+
+    def __init__(self, caller: Player):
+        self.caller = caller
+        commands = {
+            'look'  : CommandLook(self.caller),
+            'quit'  : CommandQuit(self.caller),
+            'say'   : CommandSay(self.caller),
+            'help'  : CommandHelp(self.caller),
+            'go'    : CommandGo(self.caller)
         }
+        
+        super().__init__(caller, commands)
 
-    def execute_command(self, player, command, param):
-        print(self.commands)
-        if self.commands.get(command):
-            self.commands[command](player, param)
-        else:
-            self.game_state.tell_player(player, "Unknown command '{}'".format(command))
 
-    def quit(self, player: Player, params=None):
-        self.game_state.server.disconnect(player.client)
+class Command(object):
 
-    def say(self, player: Player, message: str):
-        # go through every player in the game
-        for other_player in self.game_state.list_other_players(player):
-            # if they're in the same room as the player
-            if other_player.location == player.location:
-                # send them a message telling them what the player said
-                self.game_state.tell_player(other_player, f"{player.name} says: {message}")
-        self.game_state.tell_player(player, f"You say: {message}")
+    def __init__(self, caller: Player):
+        self.caller = caller
+        self.verb = verb
 
-    def help(self, player: Player, params=None):
-        # send the player back the list of possible commands
-        self.game_state.tell_player(player, "Commands:")
-        self.game_state.tell_player(player, "  say <message>  - Says something out loud,"
-                                            "e.g. 'say Hello'")
-        self.game_state.tell_player(player, "  look           - Examines the "
-                                            "surroundings, e.g. 'look'")
-        self.game_state.tell_player(player, "  go <exit>      - Moves through the exit "
-                                            "specified, e.g. 'go outside'")
 
-    def look(self, player: Player, params=None):
-        # store the player's current room
-        current_location = rooms[player.location]
+class CommandLook(Command):
 
-        # send the player back the description of their current room
-        self.game_state.tell_player(player, current_location['description'])
+    def __init__(self, caller: Player):
+        super().__init__(caller)
 
-        players_here = []
-        # go through every player in the game
-        for other_player in self.game_state.list_players():
-            # if they're in the same room as the player
-            if other_player.location == player.location:
-                # ... and they have a name to be shown
-                if other_player.name:
-                    # add their name to the list
-                    players_here.append(other_player.name)
+    def call(self, params=None):
+        current_location = rooms[self.caller.location]
+        self.caller.message(current_location['description'])
 
-        # send player a message containing the list of players in the room
-        self.game_state.tell_player(player, "Players here: {}".format(", ".join(players_here)))
-        # send player a message containing the list of exits from this room
-        self.game_state.tell_player(player, "Exits are: {}".format(", ".join(current_location["exits"])))
+        players_here = self.caller.search(SearchType.PLAYER)
+        self.caller.message("Players here: {}".format(", ".join(players_here)))
+        self.caller.message("Exits are: {}".format(", ".join(current_location["exits"])))
+    
 
-    def go(self, player: Player, params):
-        # store the exit name
+class CommandQuit(Command):
+
+    def __init__(self, caller: Player):
+        super().__init__(caller)
+
+    def call(self, params=None):
+        self.caller.disconnect()
+
+
+class CommandSay(Command):
+
+    def __init__(self, caller: Player):
+        super().__init__(caller)
+
+    def call(self, params=None):
+        # Keep the variable name 'params' in the signature but convert it to
+        # message for readability within this function.
+        message = params
+
+        if not message:
+            self.caller.message("Say what?")
+            return
+
+        current_location = rooms[self.caller.location]
+        players_here = self.caller.search(SearchType.PLAYER)
+
+        for player in players_here:
+            player.message(message)
+
+        self.caller.message(f"You say: {params}")
+
+
+class CommandHelp(Command):
+
+    def __init__(self, caller: Player):
+        super().__init__(caller)
+
+    def call(self, params=None):
+        self.caller.message("Commands:")
+        self.caller.message("  say <message>  - Says something out loud, e.g. 'say Hello'")
+        self.caller.message("  look           - Examines the surroundings, e.g. 'look'")
+        self.caller.message("  go <exit>      - Moves through the exit specified, e.g. 'go outside'")
+
+
+class CommandGo(Command):
+
+    def __init__(self, caller: Player):
+        super().__init__(caller)
+    
+    def call(self, params=None):
+        current_location = rooms[self.caller.location]
+
         ex = params.lower()
 
-        # store the player's current room
-        current_location = rooms[player.location]
+        if ex in current_location['exits']:
+            for other_player in self.caller.search(SearchType.PLAYER):
+                other_player.message(f"{caller.name} left via exit '{ex}'")
 
-        # if the specified exit is found in the room's exits list
-        if ex in current_location["exits"]:
 
-            # go through all the players in the game
-            for other_player in self.game_state.list_players():
-                # if player is in the same room and isn't the player
-                # sending the command
-                if other_player.location == player.location and other_player.uuid != player.uuid:
-                    # send them a message telling them that the player
-                    # left the room
-                    self.game_state.tell_player(other_player.uuid, f"{player.name} left via exit '{ex}'")
+            self.caller.location = current_location['exits'][ex]
+            
+            for other_player in self.caller.search(SearchType.PLAYER):
+                other_player.message(f"{player.name} arrived via exit '{ex}'")
 
-            # update the player's current room to the one the exit leads to
-            player.location = current_location["exits"][ex]
-            current_location = rooms[player.location]
-
-            # go through all the players in the game
-            for other_player in self.game_state.list_players():
-                # if player is in the same (new) room and isn't the player
-                # sending the command
-                if other_player.location == player.location and other_player.uuid != player.uuid:
-                    # send them a message telling them that the player
-                    # entered the room
-                    self.game_state.tell_player(other_player, f"{player.name} arrived via exit '{ex}'")
-
-            # send the player a message telling them where they are now
-            self.game_state.tell_player(player, f"You arrive at '{player.location}'")
-            self.game_state.tell_player(player, rooms[player.location]["description"])
-
-        # the specified exit wasn't found in the current room
+            self.caller.message(f"You arrive at '{player.location}'")
+            self.caller.message(rooms[self.caller.location]["description"])
+        
         else:
-            # send back an 'unknown exit' message
-            self.game_state.tell_player(player, f"Unknown exit '{ex}'")
+            self.caller.message(f"Unknown exit '{ex}'")

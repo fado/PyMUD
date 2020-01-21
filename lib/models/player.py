@@ -1,4 +1,7 @@
 from abc import ABC
+from typing import List
+
+import lib.command 
 
 from lib.models.client import Client
 from lib.models.creature import Creature
@@ -6,8 +9,12 @@ from lib.models.creature import Creature
 
 class Player(Creature, ABC):
 
-    def __init__(self, client: Client, creature: Creature = None):
+    def __init__(self, 
+                 client: Client, 
+                 creature: Creature = None):
         self.client = client
+        self.game_state = game_state
+        self.cmdset = PlayerCommandSet(self)
 
         if creature:
             super().__init__(
@@ -29,3 +36,24 @@ class Player(Creature, ABC):
             )
 
         super().__init__()
+
+    def message(self, message):
+        self.game_state.server.send_message(self.client.uuid, message)
+    
+    def has_command(self, verb) -> bool:
+        return any(command for command in cmdset.commands if command.verb == verb)
+
+    def call_command(self, verb, params):
+        self.cmdset[verb](self, params)
+
+    def search(self, type: SearchType, search_string: str = None):
+        results = []
+
+        if type == SearchType.PLAYER:
+            for other_player in self.game_state.list_players():
+                if other_player.location == self.location:
+                    results.append(other_player)
+            return results
+
+    def disconnect(self):
+        self.game_state.server.disconnect(self.client)

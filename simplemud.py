@@ -23,13 +23,14 @@ author: Mark Frimston - mfrimston@gmail.com
 
 import time
 
-from game_data import rooms
-from lib.command import Commands
-from lib.models.game_state import GameState
-from mudserver import MudServer
+from typing import Dict
 
-game = GameState(MudServer())
-commands = Commands(game)
+from game_data import rooms
+from mudserver import MudServer
+from lib.models.player import Player
+
+server = MudServer()
+players = Dict[Player]
 
 # main game loop. We loop forever (i.e. until the program is terminated)
 while True:
@@ -75,4 +76,4 @@ while True:
 
         # each of the possible commands is handled below. Try adding new
         # commands to the game!
-        commands.execute_command(player, command, params)
+        player.call_command(command, params)
