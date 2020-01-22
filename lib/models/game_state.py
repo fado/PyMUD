@@ -33,7 +33,7 @@ class GameState(object):
     def handle_player_join(self):
         for event in self.server.get_new_player_events():
             new_client = event.client
-            new_player = Player(new_client)
+            new_player = Player(new_client, self.server)
             self.add_player(new_player)
             self.tell_player(new_player, "What is your name?")
 
