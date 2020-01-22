@@ -21,11 +21,10 @@ class Commands(object):
         }
 
     def execute_command(self, player, command, param):
-        print(self.commands)
         if self.commands.get(command):
             self.commands[command](player, param)
         else:
-            self.game_state.tell_player(player, "Unknown command '{}'".format(command))
+            player.message("Unknown command '{}'".format(command))
 
     def quit(self, player: Player, params=None):
         self.game_state.server.disconnect(player.client)
@@ -36,25 +35,22 @@ class Commands(object):
             # if they're in the same room as the player
             if other_player.location == player.location:
                 # send them a message telling them what the player said
-                self.game_state.tell_player(other_player, f"{player.name} says: {message}")
-        self.game_state.tell_player(player, f"You say: {message}")
+                other_player.message(f"{player.name} says: {message}")
+        player.message(f"You say: {message}")
 
     def help(self, player: Player, params=None):
         # send the player back the list of possible commands
-        self.game_state.tell_player(player, "Commands:")
-        self.game_state.tell_player(player, "  say <message>  - Says something out loud,"
-                                            "e.g. 'say Hello'")
-        self.game_state.tell_player(player, "  look           - Examines the "
-                                            "surroundings, e.g. 'look'")
-        self.game_state.tell_player(player, "  go <exit>      - Moves through the exit "
-                                            "specified, e.g. 'go outside'")
+        player.message("Commands:")
+        player.message("  say <message>  - Says something out loud, e.g. 'say Hello'")
+        player.message("  look           - Examines the surroundings, e.g. 'look'")
+        player.message("  go <exit>      - Moves through the exit specified, e.g. 'go outside'")
 
     def look(self, player: Player, params=None):
         # store the player's current room
         current_location = rooms[player.location]
 
         # send the player back the description of their current room
-        self.game_state.tell_player(player, current_location['description'])
+        player.message(current_location['description'])
 
         players_here = []
         # go through every player in the game
@@ -67,9 +63,9 @@ class Commands(object):
                     players_here.append(other_player.name)
 
         # send player a message containing the list of players in the room
-        self.game_state.tell_player(player, "Players here: {}".format(", ".join(players_here)))
+        player.message("Players here: {}".format(", ".join(players_here)))
         # send player a message containing the list of exits from this room
-        self.game_state.tell_player(player, "Exits are: {}".format(", ".join(current_location["exits"])))
+        player.message("Exits are: {}".format(", ".join(current_location["exits"])))
 
     def go(self, player: Player, params):
         # store the exit name
@@ -88,7 +84,7 @@ class Commands(object):
                 if other_player.location == player.location and other_player.uuid != player.uuid:
                     # send them a message telling them that the player
                     # left the room
-                    self.game_state.tell_player(other_player.uuid, f"{player.name} left via exit '{ex}'")
+                    other_player.message(f"{player.name} left via exit '{ex}'")
 
             # update the player's current room to the one the exit leads to
             player.location = current_location["exits"][ex]
@@ -101,13 +97,13 @@ class Commands(object):
                 if other_player.location == player.location and other_player.uuid != player.uuid:
                     # send them a message telling them that the player
                     # entered the room
-                    self.game_state.tell_player(other_player, f"{player.name} arrived via exit '{ex}'")
+                    other_player.message(f"{player.name} arrived via exit '{ex}'")
 
             # send the player a message telling them where they are now
-            self.game_state.tell_player(player, f"You arrive at '{player.location}'")
-            self.game_state.tell_player(player, rooms[player.location]["description"])
+            player.message(f"You arrive at '{player.location}'")
+            player.message(rooms[player.location]["description"])
 
         # the specified exit wasn't found in the current room
         else:
             # send back an 'unknown exit' message
-            self.game_state.tell_player(player, f"Unknown exit '{ex}'")
+            player.message(f"Unknown exit '{ex}'")
