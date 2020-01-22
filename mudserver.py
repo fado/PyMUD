@@ -149,7 +149,6 @@ class MudServer(object):
             self._new_events.append(
                 Event(ServerEvents.NEW_PLAYER, client)
             )
-            print(self._new_events)
 
     def _check_for_disconnected(self):
 

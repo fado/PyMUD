@@ -54,7 +54,6 @@ class Creature(Entity):
 
     def get_modifier(self, ability: Ability) -> int:
         value = self.abilities.get(ability)
-        print(self.abilities)
         return (value - 10) // 2
 
     def get_strength_modifier(self) -> int:

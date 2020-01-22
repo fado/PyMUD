@@ -69,7 +69,7 @@ while True:
 
             game.tell_player(player, f"Welcome to the game, {player.name}.")
             game.tell_player(player, "Type 'help' for a list of commands. Have fun!")
-            game.tell_player(player, rooms[player.location]["description"])
+            game.tell_player(player, rooms[player.location].description)
 
             continue
 

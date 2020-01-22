@@ -50,7 +50,7 @@ class Commands(object):
         current_location = rooms[player.location]
 
         # send the player back the description of their current room
-        player.message(current_location['description'])
+        player.message(current_location.description)
 
         players_here = []
         # go through every player in the game
@@ -65,7 +65,7 @@ class Commands(object):
         # send player a message containing the list of players in the room
         player.message("Players here: {}".format(", ".join(players_here)))
         # send player a message containing the list of exits from this room
-        player.message("Exits are: {}".format(", ".join(current_location["exits"])))
+        player.message("Exits are: {}".format(", ".join([ex.name for ex in current_location.exits])))
 
     def go(self, player: Player, params):
         # store the exit name
@@ -75,7 +75,7 @@ class Commands(object):
         current_location = rooms[player.location]
 
         # if the specified exit is found in the room's exits list
-        if ex in current_location["exits"]:
+        if current_location.has_exit(ex):
 
             # go through all the players in the game
             for other_player in self.game_state.list_players():
@@ -87,8 +87,7 @@ class Commands(object):
                     other_player.message(f"{player.name} left via exit '{ex}'")
 
             # update the player's current room to the one the exit leads to
-            player.location = current_location["exits"][ex]
-            current_location = rooms[player.location]
+            player.location = current_location.get_exit(ex).destination
 
             # go through all the players in the game
             for other_player in self.game_state.list_players():
@@ -101,7 +100,7 @@ class Commands(object):
 
             # send the player a message telling them where they are now
             player.message(f"You arrive at '{player.location}'")
-            player.message(rooms[player.location]["description"])
+            player.message(rooms[player.location].description)
 
         # the specified exit wasn't found in the current room
         else:
