@@ -18,25 +18,25 @@ class Weapon(Entity):
         super().__init__(name, description)
 
 
+class Exit(Entity):
+    def __init__(self, name, description, destination, exit_type: ExitType):
+        self.destination = destination
+        self.type = exit_type
+        super().__init__(name, description)
+
+
+class DescriptionItem():
+    '''Similar to Entity, but distinct in that you'll never be able to pick up
+    a description item. It exists just for flavour text. Every noun in a room's
+    description should have a corresponding description item.
+    '''
+    def __init__(self, name: str, aliases: List[str], description: str):
+        self.name = name
+        self.aliases = aliases
+        self.description = description
+
+
 class Room(Entity):
-
-    class Exit(Entity):
-        def __init__(self, name, description, destination, exit_type: ExitType):
-            self.destination = destination
-            self.type = exit_type
-            super().__init__(name, description)
-
-
-    class DescriptionItem():
-        '''Similar to Entity, but distinct in that you'll never be able to pick up
-        a description item. It exists just for flavour text. Every noun in a room's
-        description should have a corresponding description item.
-        '''
-        def __init__(self, name: str, aliases: List[str], description: str):
-            self.name = name
-            self.aliases = aliases
-            self.description = description
-
 
     def __init__(self, 
                  name: str, 
