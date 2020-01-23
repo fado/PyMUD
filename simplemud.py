@@ -63,7 +63,7 @@ while True:
 
         if player.name is None:
             # Any new command event will become the player's name.
-            player.name = event.command
+            player.name = command.capitalize()
     
             game.broadcast(f"{player.name} entered the game.")
 
