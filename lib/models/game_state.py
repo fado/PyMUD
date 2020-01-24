@@ -45,7 +45,7 @@ class GameState(object):
                 continue
 
             for player_id, player in self.players.items():
-                self.tell_player(player, "{} quit the game".format(disconnected_player))
+                self.tell_player(player, "{} quit the game".format(disconnected_player.name))
 
             self.remove_player(disconnected_player)
 
