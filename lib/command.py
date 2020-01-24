@@ -88,6 +88,9 @@ class Commands(object):
 
             # update the player's current room to the one the exit leads to
             player.location = current_location.get_exit(ex).destination
+            current_location = rooms[player.location]
+            current_location.inventory.add_item(player)
+            
 
             # go through all the players in the game
             for other_player in self.game_state.list_players():

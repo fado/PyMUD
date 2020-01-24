@@ -3,7 +3,7 @@ from typing import List, Dict
 
 from lib.constants import DEFAULT_START_LOCATION
 from lib.models.character_class import CharacterClass
-from lib.models.entity import *
+from lib.models.entity import Entity, Inventory
 from lib.models.enums import Ability, Skill, Alignment
 
 
