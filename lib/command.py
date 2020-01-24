@@ -33,7 +33,7 @@ class Commands(object):
         # go through every player in the game
         for other_player in self.game_state.list_other_players(player):
             # if they're in the same room as the player
-            if other_player.location == player.location:
+            if other_player._location == player._location:
                 # send them a message telling them what the player said
                 other_player.message(f"{player.name} says: {message}")
         player.message(f"You say: {message}")
@@ -47,23 +47,15 @@ class Commands(object):
 
     def look(self, player: Player, params=None):
         # store the player's current room
-        current_location = rooms[player.location]
+        current_location = rooms[player._location]
 
         # send the player back the description of their current room
         player.message(current_location.description)
 
-        players_here = []
-        # go through every player in the game
-        for other_player in self.game_state.list_players():
-            # if they're in the same room as the player
-            if other_player.location == player.location:
-                # ... and they have a name to be shown
-                if other_player.name:
-                    # add their name to the list
-                    players_here.append(other_player.name)
+        players_here = self._get_players_with(player)
 
         # send player a message containing the list of players in the room
-        player.message("Players here: {}".format(", ".join(players_here)))
+        player.message("Players here: {}".format(", ".join([player.name for player in players_here])))
         # send player a message containing the list of exits from this room
         player.message("Exits are: {}".format(", ".join([ex.name for ex in current_location.exits])))
 
@@ -72,40 +64,30 @@ class Commands(object):
         ex = params.lower()
 
         # store the player's current room
-        current_location = rooms[player.location]
+        current_location = rooms[player._location]
 
         # if the specified exit is found in the room's exits list
         if current_location.has_exit(ex):
 
-            # go through all the players in the game
-            for other_player in self.game_state.list_players():
-                # if player is in the same room and isn't the player
-                # sending the command
-                if other_player.location == player.location and other_player.uuid != player.uuid:
-                    # send them a message telling them that the player
-                    # left the room
-                    other_player.message(f"{player.name} left via exit '{ex}'")
+            for other_player in self._get_players_with(player):
+                other_player.message(f"{player.name} left via exit '{ex}'")
 
             # update the player's current room to the one the exit leads to
-            player.location = current_location.get_exit(ex).destination
-            current_location = rooms[player.location]
-            current_location.inventory.add_item(player)
-            
+            player.move(current_location.get_exit(ex).destination)
 
-            # go through all the players in the game
-            for other_player in self.game_state.list_players():
-                # if player is in the same (new) room and isn't the player
-                # sending the command
-                if other_player.location == player.location and other_player.uuid != player.uuid:
-                    # send them a message telling them that the player
-                    # entered the room
-                    other_player.message(f"{player.name} arrived via exit '{ex}'")
-
-            # send the player a message telling them where they are now
-            player.message(f"You arrive at '{player.location}'")
-            player.message(rooms[player.location].description)
+            for other_player in self._get_players_with(player):
+                other_player.message(f"{player.name} arrived via exit '{ex}'")
 
         # the specified exit wasn't found in the current room
         else:
             # send back an 'unknown exit' message
             player.message(f"Unknown exit '{ex}'")
+
+    def _get_players_with(self, player: Player):
+        players = []
+
+        for uuid, item in rooms[player._location].inventory.get_items():
+            if isinstance(item, Player) and item is not player:
+                players.append(item)
+
+        return players

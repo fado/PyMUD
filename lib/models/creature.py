@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Dict
 
+from game_data import rooms
 from lib.constants import DEFAULT_START_LOCATION
 from lib.models.character_class import CharacterClass
 from lib.models.entity import Entity, Inventory
@@ -48,7 +49,7 @@ class Creature(Entity):
         self.death_save_success: int = 0
         self.death_save_failure: int = 0
         self.inventory: Inventory = inventory
-        self.location = DEFAULT_START_LOCATION
+        self._location = ""
 
         super().__init__()
 
@@ -87,3 +88,12 @@ class Creature(Entity):
     def heal(self, amount: int) -> int:
         self.current_hp += amount
         return self.current_hp
+
+    def move(self, destination: str):
+        self._location = destination
+        rooms[self._location].inventory.add_item(self)
+
+    # I don't mind people reading the location, but I want to discourage them from
+    # setting it. They should use the above method.
+    def get_location(self) -> str:
+        return self._location

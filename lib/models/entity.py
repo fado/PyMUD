@@ -93,4 +93,4 @@ class Inventory(object):
         return self.inventory.get(item.uuid) != False
 
     def get_items(self) -> Dict[str, Entity]:
-        return self.inventory
+        return self.inventory.items()

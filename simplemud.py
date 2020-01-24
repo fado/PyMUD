@@ -24,9 +24,10 @@ author: Mark Frimston - mfrimston@gmail.com
 import time
 
 from game_data import rooms
+from mudserver import MudServer
+from lib.constants import DEFAULT_START_LOCATION
 from lib.command import Commands
 from lib.models.game_state import GameState
-from mudserver import MudServer
 
 game = GameState(MudServer())
 commands = Commands(game)
@@ -67,9 +68,9 @@ while True:
     
             game.broadcast(f"{player.name} entered the game.")
 
-            game.tell_player(player, f"Welcome to the game, {player.name}.")
-            game.tell_player(player, "Type 'help' for a list of commands. Have fun!")
-            game.tell_player(player, rooms[player.location].description)
+            player.message(f"Welcome to the game, {player.name}.")
+            player.message("Type 'help' for a list of commands. Have fun!")
+            player.move(DEFAULT_START_LOCATION)
 
             continue
 
