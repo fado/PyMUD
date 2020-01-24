@@ -1,5 +1,6 @@
 from abc import ABC
 
+from game_data import rooms
 from lib.models.client import Client
 from lib.models.creature import Creature
 from mudserver import MudServer
@@ -35,3 +36,8 @@ class Player(Creature, ABC):
 
     def message(self, message):
         self.server.send_message(self.client.uuid, message)
+
+    def move(self, destination):
+        super().move(destination)
+        self.message(f"You arrive at '{self._location}'")
+        self.message(rooms[self._location].description)
