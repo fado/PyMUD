@@ -12,7 +12,7 @@ from test.fixtures.mock_server import MockServer
 def command_class(mock_server: MudServer, num_clients: int = 2):
     commands = Commands(GameState(mock_server))
     for n in range(num_clients):
-        player = Player(create_client_fixture(n))
+        player = Player(create_client_fixture(n), mock_server)
         player.name = "Player-%s" % n
         commands.game_state.add_player(player)
     return commands
