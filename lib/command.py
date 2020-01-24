@@ -27,9 +27,11 @@ class Commands(object):
             player.message("Unknown command '{}'".format(command))
 
     def quit(self, player: Player, params=None):
+        """  quit           - Disconnects from the server"""
         self.game_state.server.disconnect(player.client)
 
     def say(self, player: Player, message: str):
+        """  say <message>  - Says something out loud, e.g. 'say Hello'"""
         # go through every player in the game
         player.message(f"You say: {message}")
         for other_player in self.game_state.list_other_players(player):
@@ -41,11 +43,12 @@ class Commands(object):
     def help(self, player: Player, params=None):
         # send the player back the list of possible commands
         player.message("Commands:")
-        player.message("  say <message>  - Says something out loud, e.g. 'say Hello'")
-        player.message("  look           - Examines the surroundings, e.g. 'look'")
-        player.message("  go <exit>      - Moves through the exit specified, e.g. 'go outside'")
+        for command in self.commands.values():
+            if command.__doc__ is not None:
+                player.message(command.__doc__)
 
     def look(self, player: Player, params=None):
+        """  look           - Examines the surroundings, e.g. 'look'"""
         # store the player's current room
         current_location = rooms[player._location]
 
@@ -60,6 +63,7 @@ class Commands(object):
         player.message("Exits are: {}".format(", ".join([ex.name for ex in current_location.exits])))
 
     def go(self, player: Player, params):
+        """  go <exit>      - Moves through the exit specified, e.g. 'go outside'"""
         # store the exit name
         ex = params.lower()
 
