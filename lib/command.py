@@ -31,12 +31,12 @@ class Commands(object):
 
     def say(self, player: Player, message: str):
         # go through every player in the game
+        player.message(f"You say: {message}")
         for other_player in self.game_state.list_other_players(player):
             # if they're in the same room as the player
             if other_player._location == player._location:
                 # send them a message telling them what the player said
                 other_player.message(f"{player.name} says: {message}")
-        player.message(f"You say: {message}")
 
     def help(self, player: Player, params=None):
         # send the player back the list of possible commands
