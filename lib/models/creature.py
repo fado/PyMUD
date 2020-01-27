@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Dict
 
+from dice import roll
 from game_data import rooms
 from lib.constants import DEFAULT_START_LOCATION
 from lib.models.character_class import CharacterClass
@@ -49,6 +50,7 @@ class Creature(Entity):
         self.death_save_success: int = 0
         self.death_save_failure: int = 0
         self.inventory: Inventory = inventory
+        self.initiative = None
         self._location = ""
 
         super().__init__()
@@ -97,3 +99,8 @@ class Creature(Entity):
     # setting it. They should use the above method.
     def get_location(self) -> str:
         return self._location
+
+    # TO-DO: Eventually other things will need to be taken into consideration, but
+    # we can worry about that down the road.
+    def roll_initiative(self) -> int:
+        self.initiative = roll(1, 20) + get_modifier(Ability.DEXTERITY)
