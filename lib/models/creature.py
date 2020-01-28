@@ -52,6 +52,8 @@ class Creature(Entity):
         self.inventory: Inventory = inventory
         self.initiative = None
         self._location = ""
+        self.target: Character = None #TODO Make this a list.
+        self.dead: bool = False #TODO Appropriate wordage?
 
         super().__init__()
 
@@ -85,6 +87,9 @@ class Creature(Entity):
 
     def take_damage(self, damage: int) -> int:
         self.current_hp -= damage
+        if self.current_hp < 0:
+            self.dead = True
+            #TODO: Death stuff.
         return self.current_hp
 
     def heal(self, amount: int) -> int:
@@ -104,3 +109,12 @@ class Creature(Entity):
     # we can worry about that down the road.
     def roll_initiative(self) -> int:
         self.initiative = roll(1, 20) + get_modifier(Ability.DEXTERITY)
+
+    def roll_attack(self, target: Character, ability: Ability) -> bool:
+        # TODO: Can we change the roll() method to notify us of natural 1's somehow?
+        roll = roll(1, 20)
+        if roll == 1: 
+            return 1
+        
+        # Make this really simple for now.
+        return roll + self.get_modifier(ability)
