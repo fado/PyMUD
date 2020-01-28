@@ -47,10 +47,11 @@ class CombatInstance():
         #TODO: Maybe change 'participant' to 'creature'?
         for participant in participants:
             roll = participant.roll_attack(participant.target)
-            if roll != 1:
-                particpant.target.message(f'{participant.name} attacks you!')
-                participant.message(f'You attack {participant.target.name}!')
-            if roll >= participant.target.armor_class:
+
+            particpant.target.message(f'{participant.name} attacks you!')
+            participant.message(f'You attack {participant.target.name}!')
+            
+            if roll != 1 and roll >= participant.target.armor_class::
                 damage = participant.roll_damage()
                 participant.target.take_damage(damage)
                 participant.target.message(f'You take {damage} damage from {participant.name}'.)
