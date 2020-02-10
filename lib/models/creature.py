@@ -87,9 +87,6 @@ class Creature(Entity):
 
     def take_damage(self, damage: int) -> int:
         self.current_hp -= damage
-        if self.current_hp < 0:
-            self.dead = True
-            #TODO: Death stuff.
         return self.current_hp
 
     def heal(self, amount: int) -> int:
@@ -118,3 +115,34 @@ class Creature(Entity):
         
         # Make this really simple for now.
         return roll + self.get_modifier(ability)
+
+    def roll_death_save(self):
+        death_save = roll(1, 20)
+        # Natural 20 restores a hit point. No longer near death.
+        if death_save == 20:
+            self.current_hp = 1
+            # Reset successes and failures.
+            self.reset_death_saves()
+        # Natural 1 counts as two failures.
+        elif death_save == 1:
+            self.death_save_failure += 2
+        # 10 or more gives one success.
+        elif death_save >= 10:
+            self.death_save_success += 1
+        # Else it's a failure.
+        else:
+            self.death_save_failure += 1
+
+        # Check where we are.
+        if self.death_save_success >= 3:
+            # We've saved.
+            self.current_hp = 1
+            # Reset successes and failures.
+            self.reset_death_saves()
+        elif self.death_save_failure >= 3:
+            self.current_hp = 0
+            self.dead = True
+
+    def reset_death_saves(self):
+        self.death_save_failure = 0
+        self.death_save_success = 0

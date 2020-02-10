@@ -24,7 +24,6 @@ class CombatInstance():
     def add_participant(self, participant: Creature):
         self.waiting_participants.append(participant)
 
-
     def remove_participant(self, participant: Creature):
         self.waiting_removal.append(participant)
 
@@ -46,27 +45,34 @@ class CombatInstance():
 
         #TODO: Maybe change 'participant' to 'creature'?
         for participant in participants:
+
+            # Do we need to make a death saving throw?
+            if participant.current_hp <= 0:
+                participant.roll_death_save()
+                # Are they dead?
+                if participant.dead:
+                    #TODO: Figure out how to tell them who killed them.
+                    participant.message(f'You die!')
+                    self.remove_participant(participant)
+                    # Move onto the next participant.
+                    continue
+                
+            # If we've got this far, they're still kicking.
             roll = participant.roll_attack(participant.target)
 
             particpant.target.message(f'{participant.name} attacks you!')
             participant.message(f'You attack {participant.target.name}!')
-            
+
             if roll != 1 and roll >= participant.target.armor_class::
                 damage = participant.roll_damage()
-                participant.target.take_damage(damage)
+                target_hp = participant.target.take_damage(damage)
                 participant.target.message(f'You take {damage} damage from {participant.name}'.)
                 participant.message(f'You deal {damage} damage to {participant.target.name}'.)
-                # Are they dead?
-                if participant.target.dead:
-                    # This will be decided in the Creature object.
-                    participant.target.message(f'{participant.name} kills you!')
-                    participant.message(f'You kill {participant.target.name}!')
-                    # Remove them from the combat.
-                    self.remove_participant(participant.target)
             else:
                 participant.message(f'You miss {participant.target.name}!')
                 participant.target.name(f'{participant.name} misses you!')
 
                 # If we're not tracking the target in this instance then we should be.
+                #TODO: Factor in surprise?
                 if participant.target not in self.participants and participant.target not in self.waiting_participants:
                     self.add_participant(participant.target)
