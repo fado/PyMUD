@@ -18,6 +18,7 @@ class Commands(object):
             "help": self.help,
             "look": self.look,
             "go": self.go,
+            "tell": self.tell,
         }
 
     def execute_command(self, player, command, param):
@@ -39,6 +40,19 @@ class Commands(object):
             if other_player._location == player._location:
                 # send them a message telling them what the player said
                 other_player.message(f"{player.name} says: {message}")
+
+    def tell(self, player: Player, params):
+        """ tell <player> message - Whisper a private message to the target player."""
+        target = params.split(' ')[0]
+        message = ' '.join(params.split(' ')[1:])
+
+        if target.lower() not in [player.name.lower() for player in self.game_state.list_other_players(player)]:
+            player.message("There is nobody online by that name.")
+
+        for other_player in self.game_state.list_other_players(player):
+            if other_player.name.lower() == target.lower():
+                player.message(f"You whisper to {target}: {message}")
+                other_player.message(f"{player.name} whispers to you: {message}")
 
     def help(self, player: Player, params=None):
         # send the player back the list of possible commands
