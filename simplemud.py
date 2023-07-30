@@ -21,6 +21,8 @@ Some ideas for things to try adding:
 author: Mark Frimston - mfrimston@gmail.com
 """
 
+import logging
+import sys
 import time
 
 from game_data import rooms
@@ -28,52 +30,74 @@ from mudserver import MudServer
 from lib.constants import DEFAULT_START_LOCATION
 from lib.command import Commands
 from lib.models.game_state import GameState
+from lib.models.player import Player
 
 game = GameState(MudServer())
 commands = Commands(game)
 
-# main game loop. We loop forever (i.e. until the program is terminated)
-while True:
+log = logging.getLogger()
 
-    # pause for 1/5 of a second on each loop, so that we don't constantly
-    # use 100% CPU time
-    time.sleep(0.2)
+def init_logging():
+    formatter = logging.Formatter("%(asctime)s [%(name)s] %(levelname)s: "\
+                                    "%(message)s")
+    consoleHandler = logging.StreamHandler()
+    consoleHandler.setFormatter(formatter)
+    log.addHandler(consoleHandler)
 
-    # 'update' must be called in the loop to keep the game running and give
-    # us up-to-date information
-    game.update()
+def handle_new_player(player: Player):
+    # Any new command event will become the player's name.
+    player.name = command.capitalize()
 
-    # go through any newly connected players
-    new_players = game.handle_player_join()
+    game.broadcast(f"{player.name} entered the game.")
 
-    # go through any recently disconnected players
-    game.handle_player_leave()
+    player.message(f"Welcome to the game, {player.name}.")
+    player.message("Type 'help' for a list of commands. Have fun!")
+    player.move(DEFAULT_START_LOCATION)
 
-    # go through any new commands sent from players
-    for event in game.server.get_commands():
-        client = event.client
-        command = event.command
-        params = event.params
-        
-        player = game.find_player_by_client_id(client.uuid)
+if __name__ == '__main__':
+    init_logging()
+    log.setLevel(logging.DEBUG)
 
-        # if for any reason the player isn't in the player map, skip them and
-        # move on to the next one
-        if not player:
-            continue
+    log.info("Starting up...")
+    try:
+        # main game loop. We loop forever (i.e. until the program is terminated)
+        while True:
 
-        if player.name is None:
-            # Any new command event will become the player's name.
-            player.name = command.capitalize()
-    
-            game.broadcast(f"{player.name} entered the game.")
+            # pause for 1/5 of a second on each loop, so that we don't constantly
+            # use 100% CPU time
+            time.sleep(0.2)
 
-            player.message(f"Welcome to the game, {player.name}.")
-            player.message("Type 'help' for a list of commands. Have fun!")
-            player.move(DEFAULT_START_LOCATION)
+            # 'update' must be called in the loop to keep the game running and give
+            # us up-to-date information
+            game.update()
 
-            continue
+            # go through any newly connected players
+            new_players = game.handle_player_join()
 
-        # each of the possible commands is handled below. Try adding new
-        # commands to the game!
-        commands.execute_command(player, command, params)
+            # go through any recently disconnected players
+            game.handle_player_leave()
+
+            # go through any new commands sent from players
+            for event in game.server.get_commands():
+                client = event.client
+                command = event.command
+                params = event.params
+                
+                player = game.find_player_by_client_id(client.uuid)
+
+                # if for any reason the player isn't in the player map, skip them and
+                # move on to the next one
+                if not player:
+                    continue
+
+                if player.name is None:
+                    handle_new_player(player)
+                    continue
+
+                # each of the possible commands is handled below. Try adding new
+                # commands to the game!
+                commands.execute_command(player, command, params)
+    except KeyboardInterrupt:
+        log.info("Terminated by user. Exiting gracefully.")
+        sys.exit(1)
+

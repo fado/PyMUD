@@ -1,3 +1,5 @@
+import logging
+
 from typing import Dict
 
 from mudserver import MudServer
@@ -6,6 +8,7 @@ from lib.models.player import Player
 # TODO: Is there too much in this class now?
 # The util didn't make sense anymore, because it was too tightly linked
 
+log = logging.getLogger()
 
 class GameState(object):
     def __init__(self, server: MudServer):
@@ -55,6 +58,7 @@ class GameState(object):
     def broadcast(self, message: str):
         for player in self.players.values():
             self.tell_player(player, message)
+        log.info(message)
 
     def find_player_by_client_id(self, client_id: str) -> Player:
         for player_id, player in self.players.items():
